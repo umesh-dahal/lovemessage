@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>365 Sweet Messages 💖</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fad0c4 50%, #ffd6e7 100%);
+    }
+
+    .card {
+      width: 100%;
+      max-width: 760px;
+      background: rgba(255, 255, 255, 0.18);
+      backdrop-filter: blur(14px);
+      border-radius: 28px;
+      padding: 28px;
+      text-align: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.14);
+    }
+
+    h1 {
+      margin: 0 0 10px;
+      color: #2d2d2d;
+      font-size: 2.1rem;
+    }
+
+    .subtitle {
+      margin: 0 0 24px;
+      color: #3a3a3a;
+      font-size: 1rem;
+      opacity: 0.95;
+    }
+
+    .message-box {
+      position: relative;
+      width: 100%;
+      min-height: 240px;
+      border-radius: 26px;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.22);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.15), 0 10px 25px rgba(0,0,0,0.08);
+    }
+
+    .message-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 30px;
+      color: #222;
+      font-size: 1.7rem;
+      line-height: 1.5;
+      font-weight: bold;
+      user-select: none;
+      z-index: 1;
+    }
+
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      cursor: crosshair;
+      border-radius: 26px;
+    }
+
+    .meta {
+      margin-top: 18px;
+      color: #333;
+      font-size: 0.98rem;
+      opacity: 0.95;
+    }
+
+    .note {
+      display: none;
+    }
+
+    .revealed {
+      margin-top: 22px;
+      color: #2d2d2d;
+      font-size: 1.08rem;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.35s ease;
+    }
+
+    .revealed.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 600px) {
+      .card { padding: 22px 16px; }
+      h1 { font-size: 1.7rem; }
+      .message-text { font-size: 1.35rem; min-height: 220px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>One sweet message every day 💕</h1>
+    <p class="subtitle">Scratch today’s surprise for your babe ✨</p>
+
+    <div class="message-box">
+      <div class="message-text" id="messageText"></div>
+      <canvas id="scratchCanvas"></canvas>
+    </div>
+
+    <div class="meta" id="dayInfo"></div>
+    <div class="note">Same message stays for 24 hours. A new unseen one appears the next day.</div>
+    <div class="revealed" id="revealedText">A little love from Umesh 💖</div>
+  </div>
+
+  <script>
+    const messages = [
+      "Every day with you feels softer, brighter, and more beautiful.",
+      "You are my favorite part of every single day.",
+      "No matter how busy life gets, my heart always finds you first.",
+      "You make ordinary moments feel magical.",
+      "Loving you is the easiest thing my heart has ever done.",
+      "You are my calm, my smile, and my happiness.",
+      "Your existence makes my world feel complete.",
+      "You are the sweetest thought in my mind every day.",
+      "With you, even silence feels romantic.",
+      "My heart feels at home when it thinks of you.",
+      "You are the reason my days feel warmer.",
+      "The best part of tomorrow is knowing you will be in it.",
+      "You are the prettiest chapter in my life.",
+      "Your smile could fix even my hardest day.",
+      "You make love feel effortless and real.",
+      "You are not just special, you are my special.",
+      "I still get happy just thinking about you.",
+      "You turn simple days into lovely memories.",
+      "You are my favorite hello and my hardest goodbye.",
+      "The more I know you, the more I adore you.",
+      "You make my heart feel lucky.",
+      "Every love song makes a little more sense because of you.",
+      "You are the kind of person hearts write poems about.",
+      "You make my life feel sweeter without even trying.",
+      "Being yours is one of my favorite feelings.",
+      "You bring peace to my soul and butterflies to my heart.",
+      "You are the dream I get to love while awake.",
+      "My heart smiles whenever your name appears.",
+      "You are my soft place in a loud world.",
+      "I love how naturally my heart chooses you.",
+      "You are the sparkle in my everyday life.",
+      "Even on normal days, loving you feels extraordinary.",
+      "You are the reason I believe love can be gentle and strong.",
+      "You are my favorite daydream.",
+      "I never get tired of caring about you.",
+      "You make my world feel less heavy and more beautiful.",
+      "You are the sweetest habit of my heart.",
+      "Just one thought of you can change my whole mood.",
+      "You are the kind of love people hope to find.",
+      "My heart feels rich because it has you.",
+      "You are my sunshine on the quiet days too.",
+      "You make me want to be softer, better, and kinder.",
+      "You are the little miracle hidden in my everyday life.",
+      "I love the peace your presence gives me.",
+      "You are the answer to so many silent wishes.",
+      "The thought of you feels like a warm blanket to my heart.",
+      "You are my favorite reason to smile for no reason.",
+      "With you, love feels safe and exciting at once.",
+      "You are the sweetness my life did not know it needed.",
+      "You make the future feel lovely.",
+      "You are my favorite person to imagine forever with.",
+      "My heart always leans toward you.",
+      "You are the prettiest feeling I have ever known.",
+      "I love the way your existence changes my whole world.",
+      "You make my heart feel deeply understood.",
+      "You are my happy place in human form.",
+      "Even my quietest love belongs to you.",
+      "You are the one my heart keeps choosing.",
+      "You make affection feel natural and endless.",
+      "My days carry more light because of you.",
+      "You are a beautiful reason to believe in love.",
+      "You are the sweetest piece of my life story.",
+      "You are my daily reminder that beautiful people exist.",
+      "Your presence alone can make a day feel worth it.",
+      "You are the gentle kind of magic life rarely gives.",
+      "I love you in all the tiny invisible ways too.",
+      "You are the calm in my chaos.",
+      "The idea of you makes my heart melt a little.",
+      "You make everything feel a little more meaningful.",
+      "You are the loveliest thing my heart holds.",
+      "I love the comfort your name brings me.",
+      "You are my today and one of my favorite tomorrows.",
+      "Your loveable soul is one of my favorite discoveries.",
+      "You are the kind of person I could adore endlessly.",
+      "My heart has a soft corner that belongs only to you.",
+      "You are the gentle excitement in my life.",
+      "You make my ordinary heart feel poetic.",
+      "I treasure you more than I can say in one sentence.",
+      "You are the reason affection feels so beautiful to me.",
+      "There is something about you that makes my whole heart exhale.",
+      "You are my favorite beautiful coincidence.",
+      "Every little thing about you feels easy to cherish.",
+      "You are the lovely thought that keeps returning.",
+      "My heart looks for you even in simple moments.",
+      "You make being soft feel like strength.",
+      "You are the smile hidden inside my day.",
+      "I like who I become when I am loving you.",
+      "You are one of the best feelings life has given me.",
+      "My world fits you so naturally.",
+      "You are the sweetness in my most random moments.",
+      "You make my heart feel both peaceful and alive.",
+      "I could spend forever appreciating how lovely you are.",
+      "You are the warmth behind so many of my smiles.",
+      "My favorite kind of day is one that includes you.",
+      "You are the person my heart writes home about.",
+      "Everything feels a little softer when I think of you.",
+      "You are the pretty little miracle of my days.",
+      "I admire you in ways words still struggle to hold.",
+      "You are my heart’s softest yes.",
+      "Even a small thought of you brightens my mood.",
+      "You are a beautiful kind of unforgettable.",
+      "My affection for you grows in quiet, steady ways.",
+      "You are the reason tenderness lives in my chest.",
+      "I feel lucky that my heart knows your name.",
+      "You make being alive feel a bit more poetic.",
+      "You are the soft glow in my everyday life.",
+      "There is no tired version of me that does not adore you.",
+      "You are my favorite person to care about.",
+      "You make me believe the heart can smile.",
+      "You are a gentle answer to a loud world.",
+      "Your existence feels like a gift I never stop noticing.",
+      "You are the prettiest pause in my rushing mind.",
+      "You are where my tenderness naturally goes.",
+      "I adore the peace your presence brings me.",
+      "You are the little spark that makes my soul softer.",
+      "If my heart had a language, it would keep saying your name.",
+      "You make so many ordinary moments secretly special.",
+      "You are the nicest thought in my busiest days.",
+      "You feel like a blessing my heart keeps unwrapping.",
+      "I love you in all the ways that words miss.",
+      "You are the softness my life wears best.",
+      "You make my heart feel well taken care of.",
+      "You are the smile waiting at the end of my thoughts.",
+      "Everything in me becomes gentler when it comes to you.",
+      "You are the sweetest echo in my heart.",
+      "I hope you always know how deeply adorable you are to me.",
+      "You are the bright little secret behind my mood.",
+      "I carry affection for you like a warm light.",
+      "You make my heart feel beautifully busy.",
+      "You are my favorite person to miss, think of, and adore.",
+      "The world feels kinder when it reminds me of you.",
+      "You are the comfort and chaos my heart somehow loves.",
+      "You make me appreciate love in its softest form.",
+      "You are the lovely detail my life needed.",
+      "My heart settles when it reaches you.",
+      "You are the answer hidden inside so many smiles.",
+      "I like loving you. It feels right in every season.",
+      "You are the beautiful distraction I never want to lose.",
+      "Your presence has a way of fixing the mood of a day.",
+      "You are the tenderness I did not know I was waiting for.",
+      "I love how easily your memory warms me.",
+      "You are the one my soft thoughts belong to.",
+      "You turn care into something magical.",
+      "You are the favorite part of my emotional world.",
+      "My heart is always a little happier near you.",
+      "You are the beautiful reason some days feel lighter.",
+      "I think the universe was being kind when it made you.",
+      "You are the sweetness hidden in my routine.",
+      "You make my feelings feel safe.",
+      "You are the kind of person I could choose again and again.",
+      "Every version of my future looks nicer with you in it.",
+      "You are the little peace I find in a complicated world.",
+      "I keep finding new reasons to be fond of you.",
+      "You are the warmth in my chest on random afternoons.",
+      "You make my heart feel fluent in softness.",
+      "You are the love-shaped light in my days.",
+      "I am quietly, steadily, and sweetly into you.",
+      "You are one of the best things my heart has ever held.",
+      "I adore the way your existence softens my edges.",
+      "You are the thought I would gladly keep forever.",
+      "Loving you feels like a beautiful instinct.",
+      "You are my favorite feeling after a long day.",
+      "You make tenderness feel strong.",
+      "You are the prettiest thing my thoughts return to.",
+      "I smile differently when you are on my mind.",
+      "You are the romance hiding inside my normal life.",
+      "My heart feels seen when it loves you.",
+      "You are the sweet little pause my soul enjoys.",
+      "I would still choose your heart in a crowded universe.",
+      "You are my favorite kind of softness.",
+      "There is something about you that makes affection overflow.",
+      "You are the lovely person behind so many of my good moods.",
+      "I keep a special kind of tenderness only for you.",
+      "You are the gentle joy inside my days.",
+      "My heart would recognize yours anywhere.",
+      "You are the reason my affection feels endless.",
+      "I love how my heart never gets bored of you.",
+      "You are the sweetest constant in my thoughts.",
+      "You make caring feel like a privilege.",
+      "You are the lovely answer to my quiet loneliness.",
+      "My heart dresses up its softest feelings for you.",
+      "You are the glow my soul reaches for.",
+      "I never run out of gentle thoughts about you.",
+      "You are my favorite beautiful interruption.",
+      "You make my heart feel like spring.",
+      "You are the delicate happiness I did not know I needed.",
+      "Every day, my heart finds another reason to adore you.",
+      "You are the smile inside my chest.",
+      "I like the way life feels when you are part of it.",
+      "You are the little miracle I would notice every time.",
+      "My favorite memories always seem to lean toward you.",
+      "You are the softness I protect most carefully.",
+      "You make my heart feel intentionally alive.",
+      "You are the nicest place my affection could land.",
+      "I hold you in that quiet, sincere part of my heart.",
+      "You are the person who makes sweetness feel real.",
+      "Every thought of you leaves a glow behind.",
+      "You are the beautiful calm I did not know I needed.",
+      "I think my heart smiles in your direction by default.",
+      "You are the tenderness my soul naturally trusts.",
+      "You make ordinary affection feel grand.",
+      "You are the best surprise my feelings ever received.",
+      "My heart loves the shape your name makes inside it.",
+      "You are my favorite beautiful habit.",
+      "I adore you in peaceful, patient, everyday ways.",
+      "You are the sparkle at the edge of my routine.",
+      "My heart finds rest in thinking of you.",
+      "You are the warm color in my emotional sky.",
+      "I love the way your existence makes room for softness.",
+      "You are the lovely reason some moments linger.",
+      "You make my soul feel less alone.",
+      "You are the affection my heart keeps safe.",
+      "I could spend a lifetime finding new ways to appreciate you.",
+      "You are the heartwarming detail in my days.",
+      "You make my emotions feel beautifully organized.",
+      "You are the one my tenderness keeps returning to.",
+      "I feel extra human in the softest way when I think of you.",
+      "You are the quiet excitement hidden inside my routine.",
+      "You make every season feel more lovable.",
+      "You are the special kind of beautiful that stays in the soul.",
+      "My heart hums a little softer because of you.",
+      "You are the lovely reason care feels infinite.",
+      "I keep falling for the gentle parts of you.",
+      "You are the person my heart instinctively trusts.",
+      "You make even distance feel full of closeness.",
+      "You are the romantic detail my life wears beautifully.",
+      "I hold your sweetness in the safest place in me.",
+      "You are the joy I would pick in every version of life.",
+      "You make my heart feel both full and light.",
+      "You are the little softness I never stop valuing.",
+      "I like loving you from the deepest, calmest part of me.",
+      "You are the tenderness that brightens my inner world.",
+      "You make my heart believe in lovely timing.",
+      "You are the person behind some of my softest hopes.",
+      "My affection rests beautifully on you.",
+      "You are the sweetest meaning inside my smiles.",
+      "I cherish you in all the tiny ways that matter.",
+      "You are the warmth I would always come back to.",
+      "You make love feel patient and golden.",
+      "You are the bright tenderness tucked into my days.",
+      "My heart keeps choosing your softness.",
+      "You are the sweet certainty inside my feelings.",
+      "I think of you and the world immediately softens.",
+      "You are the beautiful reason my heart stays open.",
+      "You make affection feel like home.",
+      "You are the one I would still blush over in quiet moments.",
+      "My world becomes a little more lovely when it includes you.",
+      "You are the calm delight inside my heart.",
+      "I treasure the space you hold in my life.",
+      "You are the pretty little truth my heart believes in.",
+      "You make care feel sacred and simple.",
+      "You are my favorite softness in this whole world.",
+      "I like that my heart has learned your warmth.",
+      "You are the emotional sunlight of my days.",
+      "You make even my quiet love feel loud in the best way.",
+      "You are the lovely thing my heart never gets tired of.",
+      "I would still choose your sweetness on every timeline.",
+      "You are the tenderness living between all my thoughts.",
+      "You make me feel rich in all the ways that matter.",
+      "You are the person my heart relaxes into.",
+      "I adore the gentle happiness your name brings.",
+      "You are the soft miracle hidden inside my routine.",
+      "You make my feelings feel worth trusting.",
+      "You are the everyday magic I get grateful for.",
+      "My heart blooms a little whenever you cross my mind.",
+      "You are the beautiful peace I did not know I was missing.",
+      "I carry your sweetness with me through my day.",
+      "You are the one who makes tenderness look easy.",
+      "You make being in love feel graceful.",
+      "You are the sweet calm after every emotional storm.",
+      "I love the beautiful softness you bring into my world.",
+      "You are the kind of person my soul feels grateful for.",
+      "You make my heart feel deeply lucky and wonderfully alive.",
+      "You are the warmest thought in the room of my mind.",
+      "I still smile at the idea of you like it is the first time.",
+      "You are the lovely answer to so many unspoken feelings.",
+      "You make my heart feel safe enough to bloom.",
+      "You are my favorite sweet thing to look forward to.",
+      "I admire how naturally beautiful your soul feels.",
+      "You are the person who turns my affection into joy.",
+      "You make every ordinary day a little more romantic.",
+      "You are the love my heart whispers most often.",
+      "My favorite feeling is caring for you quietly and deeply.",
+      "You are the sparkle my life wears best.",
+      "You make softness feel like a superpower.",
+      "You are the sweetest place my thoughts visit.",
+      "I hope life stays gentle with someone as lovely as you.",
+      "You are the person my heart always has room for.",
+      "You make my days better just by existing.",
+      "You are the favorite wish my heart already got.",
+      "I never stop finding you adorable in new ways.",
+      "You are the warmth hidden in all my hopeful thoughts.",
+      "You make my heart speak in softer tones.",
+      "You are the beautiful little peace I would choose daily.",
+      "I love you in ways that feel both calm and endless.",
+      "You are the sweet center of so many good feelings.",
+      "You make my heart feel beautifully occupied.",
+      "You are the person I would still write love into.",
+      "I keep a special gentleness for you and only you.",
+      "You are the hidden sweetness in my every day.",
+      "You make my inner world feel prettier.",
+      "You are the kind of beautiful that stays long after the moment.",
+      "I am endlessly fond of the softness you bring into life.",
+      "You are the lovely rhythm behind my heart.",
+      "You make affection feel like art.",
+      "You are the comfort my feelings keep reaching for.",
+      "I would choose your smile as my daily favorite view.",
+      "You are the bright tenderness that lives in me.",
+      "You make loving feel simple, natural, and true.",
+      "You are the sweet thought tucked inside my busiest hours.",
+      "My heart is gentler because it knows you.",
+      "You are the beautiful peace behind my smile.",
+      "I like the way your existence makes everything softer.",
+      "You are the loveliest part of so many of my thoughts.",
+      "You make my heart feel like it is holding light.",
+      "You are the one who turns fondness into something unforgettable.",
+      "I carry your sweetness like a secret blessing.",
+      "You are the person behind so much of my quiet happiness.",
+      "You make every day feel a little more worth it.",
+      "You are the calm wonder my heart keeps admiring.",
+      "I love you in soft ways that never run out.",
+      "You are the sweetness that lingers even after the moment ends.",
+      "You make my life feel gently enchanted.",
+      "You are my favorite reason to believe in beautiful things.",
+      "I could never get tired of finding you lovely.",
+      "You are the gentle answer my heart keeps repeating.",
+      "You make my days bloom in quiet ways.",
+      "You are the soft joy I would always save a place for.",
+      "I cherish the way your presence changes the atmosphere of my heart.",
+      "You are the beautiful feeling that stays.",
+      "You make my world feel more tender, more alive, and more worth loving.",
+      "You are my little forever hidden inside each day.",
+      "Every day, I love that you exist."
+    ];
+
+    const STORAGE_KEY = "sweetMessage365State_v1";
+    const messageText = document.getElementById("messageText");
+    const dayInfo = document.getElementById("dayInfo");
+    const revealedText = document.getElementById("revealedText");
+    const canvas = document.getElementById("scratchCanvas");
+    const ctx = canvas.getContext("2d");
+
+    function resizeCanvas() {
+      const box = canvas.parentElement.getBoundingClientRect();
+      canvas.width = box.width;
+      canvas.height = box.height;
+      drawCover();
+    }
+
+    function getTodayKey() {
+      const now = new Date();
+      return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
+    }
+
+    function shuffle(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    function loadState() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        const freshState = {
+          order: shuffle(messages.map((_, i) => i)),
+          pointer: 0,
+          todayKey: null,
+          currentIndex: null,
+          revealedToday: false
+        };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(freshState));
+        return freshState;
+      }
+      return JSON.parse(raw);
+    }
+
+    function saveState(state) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    }
+
+    function ensureStateForToday() {
+      let state = loadState();
+      const todayKey = getTodayKey();
+
+      if (!Array.isArray(state.order) || state.order.length !== messages.length) {
+        state.order = shuffle(messages.map((_, i) => i));
+        state.pointer = 0;
+        state.todayKey = null;
+        state.currentIndex = null;
+        state.revealedToday = false;
+      }
+
+      if (state.pointer >= state.order.length) {
+        state.order = shuffle(messages.map((_, i) => i));
+        state.pointer = 0;
+      }
+
+      if (state.todayKey !== todayKey || state.currentIndex === null) {
+        state.currentIndex = state.order[state.pointer];
+        state.pointer += 1;
+        state.todayKey = todayKey;
+        state.revealedToday = false;
+
+        if (state.pointer >= state.order.length) {
+          // keeps current one for today, reshuffles remaining future cycle later
+          state.order = shuffle(messages.map((_, i) => i));
+          state.pointer = 0;
+        }
+
+        saveState(state);
+      }
+
+      return state;
+    }
+
+    function drawCover() {
+      ctx.globalCompositeOperation = "source-over";
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+      gradient.addColorStop(0, "#ff5c8a");
+      gradient.addColorStop(1, "#ff8fb1");
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      for (let i = 0; i < 80; i++) {
+        ctx.fillStyle = `rgba(255,255,255,${Math.random() * 0.18})`;
+        ctx.beginPath();
+        ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2.2 + 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      ctx.fillStyle = "rgba(255,255,255,0.96)";
+      ctx.textAlign = "center";
+      ctx.font = `bold ${Math.max(20, canvas.width * 0.038)}px Arial`;
+      ctx.fillText("Scratch here, babe 💖", canvas.width / 2, canvas.height / 2);
+    }
+
+    function markRevealedToday() {
+      const state = loadState();
+      state.revealedToday = true;
+      saveState(state);
+      revealedText.classList.add("show");
+    }
+
+    function scratchSetup() {
+      let isDrawing = false;
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        return {
+          x: (clientX - rect.left) * (canvas.width / rect.width),
+          y: (clientY - rect.top) * (canvas.height / rect.height)
+        };
+      }
+
+      function scratch(x, y) {
+        ctx.globalCompositeOperation = "destination-out";
+        ctx.beginPath();
+        ctx.arc(x, y, 24, 0, Math.PI * 2);
+        ctx.fill();
+        checkRevealAmount();
+      }
+
+      function start(e) {
+        isDrawing = true;
+        const pos = getPos(e);
+        scratch(pos.x, pos.y);
+        if (e.cancelable) e.preventDefault();
+      }
+
+      function move(e) {
+        if (!isDrawing) return;
+        const pos = getPos(e);
+        scratch(pos.x, pos.y);
+        if (e.cancelable) e.preventDefault();
+      }
+
+      function end() {
+        isDrawing = false;
+      }
+
+      canvas.onmousedown = start;
+      canvas.onmousemove = move;
+      canvas.onmouseup = end;
+      canvas.onmouseleave = end;
+      canvas.ontouchstart = start;
+      canvas.ontouchmove = move;
+      canvas.ontouchend = end;
+    }
+
+    function checkRevealAmount() {
+      const state = loadState();
+      if (state.revealedToday) return;
+
+      const pixels = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+      let transparent = 0;
+
+      for (let i = 3; i < pixels.length; i += 4) {
+        if (pixels[i] === 0) transparent++;
+      }
+
+      const percent = transparent / (canvas.width * canvas.height);
+      if (percent > 0.42) {
+        canvas.style.opacity = "0";
+        canvas.style.pointerEvents = "none";
+        markRevealedToday();
+      }
+    }
+
+    function init() {
+      const state = ensureStateForToday();
+      const msg = messages[state.currentIndex];
+      messageText.textContent = msg;
+      dayInfo.textContent = `Today’s love note: ${state.todayKey}`;
+      revealedText.classList.toggle("show", !!state.revealedToday);
+
+      canvas.style.opacity = state.revealedToday ? "0" : "1";
+      canvas.style.pointerEvents = state.revealedToday ? "none" : "auto";
+
+      resizeCanvas();
+      if (state.revealedToday) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+
+    window.addEventListener("resize", () => {
+      const state = loadState();
+      resizeCanvas();
+      if (state.revealedToday) {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        canvas.style.opacity = "0";
+      }
+    });
+
+    scratchSetup();
+    init();
+  </script>
+</body>
+</html>
